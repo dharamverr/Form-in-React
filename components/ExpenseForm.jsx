@@ -2,27 +2,41 @@ import { useState } from "react";
 
 export default function ExpenseForm({ setExpenses }) {
   /***Get form Data with controlled components*******************/
-  /** using individual state ****************************
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
-  const [amount, setAmount] = useState('')
- 
-  function handleSubmit(e) {
-    e.preventDefault();
-    const expense ={title , category , amount, id:crypto.randomUUID()}
-    setExpenses((prevState) => [...prevState , expense])
-    setTitle('')
-    setCategory('')
-    setAmount('')
-  } *****************************************************************/
-  /**get data using single state */
+  /**get form data using single state */
   const [expense, setExpense] = useState({
     title: '',
     category: '',
     amount: '',
   });
+  /***Start form Validation ********/
+  const [errors , setErrors] = useState({}) 
+
+  const validate = (formData) => {
+        const errorsData={}
+
+        if(!formData.title){
+          errorsData.title = 'Title is required'
+        }
+
+        if(!formData.category){
+          errorsData.category ='Please select category'
+        }
+
+        if(!formData.amount){
+          errorsData.amount =  'Please enter an amount'
+        }
+        setErrors(errorsData)
+        return errorsData
+  }
+      /********* End form Validation ********/
+
+
   function handleSubmit(e) {
     e.preventDefault();
+      /** Form validation function used in event handler***/
+    const validateResult = validate(expense)    
+    if(Object.keys(validateResult).length) return
+       /** End Form validation function used in event handler ***/
     setExpenses((prevState)=>[...prevState,{...expense , id:crypto.randomUUID()}])
     setExpense({
       title: '',
@@ -30,25 +44,16 @@ export default function ExpenseForm({ setExpenses }) {
       amount: '',
     })
   }
-  /**********Get form data without react(controlled component)*****************
-   
-   function handleSubmit(e){
-        e.preventDefault()       
-        //console.log(getFormData(e.target));
-        const addNewExpense = {...getFormData(e.target) , id:crypto.randomUUID()}
-        setExpenses((prevState)=>[...prevState ,addNewExpense])
-        e.target.reset()
-    }
+  
+  /** optimization of onChange handler **/
+  const handleChange = (e)=>{
+    // const {name} = e.target
+    // setExpense((prevState)=>({...prevState, [name]: e.target.value}))
 
-  const getFormData = (form) => {
-    const formData = new FormData(form);
-    const data ={}
-    for (const [key ,value] of formData) {
-        data[key] = value
-      }
-    return data
-  }
-   ***********************************************************************/
+    const {name , value} = e.target
+    setExpense((prevState)=>({...prevState, [name]: value})) 
+    setErrors({})  //  setErrors is empty because when user start text in input, error should be hidden
+    }
 
   return (
     <form className="expense-form" onSubmit={handleSubmit}>
@@ -57,21 +62,20 @@ export default function ExpenseForm({ setExpenses }) {
         <input
           id="title"
           name="title"
-          // value={title}
-          // onChange={(e) => setTitle(e.target.value)}
           value={expense.title}
-          onChange={(e)=>setExpense((prevState)=>({...prevState, title: e.target.value}))}
+          // onChange={(e)=>setExpense((prevState)=>({...prevState, title: e.target.value}))}
+          onChange={handleChange}
         />
+        <p className="error">{errors.title}</p>
       </div>
       <div className="input-container">
         <label htmlFor="category">Category</label>
         <select
           id="category"
           name="category"
-          // value={category}
-          // onChange={(e) => setCategory(e.target.value)}
           value={expense.category}
-          onChange={(e)=>setExpense((prevState)=>({...prevState, category: e.target.value}))}
+          // onChange={(e)=>setExpense((prevState)=>({...prevState, category: e.target.value}))}
+          onChange={handleChange}
         >
           <option hidden>Select Category</option>
           <option value="Grocery">Grocery</option>
@@ -80,17 +84,18 @@ export default function ExpenseForm({ setExpenses }) {
           <option value="Education">Education</option>
           <option value="Medicine">Medicine</option>
         </select>
+        <p className="error">{errors.category}</p>
       </div>
       <div className="input-container">
         <label htmlFor="amount">Amount</label>
         <input
           id="amount"
           name="amount"
-          // value={amount}
-          // onChange={(e) => setAmount(e.target.value)}
           value={expense.amount}
-          onChange={(e)=>setExpense((prevState)=>({...prevState , amount: e.target.value}))}
+          // onChange={(e)=>setExpense((prevState)=>({...prevState , amount: e.target.value}))}
+          onChange={handleChange}
         />
+        <p className="error">{errors.amount}</p>
       </div>
       <button className="add-btn">Add</button>
     </form>
