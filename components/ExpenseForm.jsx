@@ -2,26 +2,24 @@ import { useState } from "react";
 import Input from "./Input";
 import SelectOption from "./SelectOption";
 
-export default function ExpenseForm({ setExpenses }) {
+export default function ExpenseForm({ setExpenses ,setExpense,expense,editingRowId,setEditingRowId}) {
   /***Get form Data with controlled components*******************/
   /**get form data using single state */
-  const [expense, setExpense] = useState({
-    title: "",
-    category: "",
-    amount: "",
-  });
+ 
   /***Start form Validation ********/
   const [errors, setErrors] = useState({});
   const validationConfig = {
     title: [
       { required: 'true', message: 'Title is required' },
       {
-        minLength: 5,
-        message: 'Title should be at least 5 character in length',
+        minLength: 2,
+        message: 'Title should be at least 2 character in length',
       },
     ],
     category: [{ required: 'true', message: 'Please select a Category' }],
-    amount: [{ required: 'true', message: 'Please enter an amount' }],
+    amount: [{ required: 'true', message: 'Please enter an amount' },
+      {pattern:/^(0|[1-9]\d*)(\.\d+)?$/ , message:'Please enter only number'}
+    ],
   };
   const validate = (formData) => {
     const errorsData = {};
@@ -34,7 +32,12 @@ export default function ExpenseForm({ setExpenses }) {
             return true
           }
 
-          if(rule.minLength && value.length < 5){
+          if(rule.minLength && value.length < rule.minLength){
+            errorsData[key] = rule.message
+            return true
+          }
+
+          if(rule.pattern && !rule.pattern.test(value)){
             errorsData[key] = rule.message
             return true
           }
@@ -63,6 +66,25 @@ export default function ExpenseForm({ setExpenses }) {
     const validateResult = validate(expense);
     if (Object.keys(validateResult).length) return;
     /** End Form validation function used in event handler ***/
+
+      if(editingRowId){
+        setExpenses((prevState)=> {
+          return (prevState.map((prevExpense)=>{
+              if(prevExpense.id === editingRowId){
+                return {...expense , id:editingRowId}
+              }
+              return prevExpense
+          })
+        )})
+        setExpense({
+          title: "",
+          category: "",
+          amount: "",
+        });
+        setEditingRowId('')
+        return
+      }
+
     setExpenses((prevState) => [
       ...prevState,
       { ...expense, id: crypto.randomUUID() },
@@ -112,9 +134,9 @@ export default function ExpenseForm({ setExpenses }) {
         name="amount"
         value={expense.amount}
         onChange={handleChange}
-        error={errors.amount}
+        error={errors.amount}      
       />
-      <button className="add-btn">Add</button>
+      <button className="add-btn">{editingRowId ? 'Save' : 'Add'}</button>
     </form>
   );
 }

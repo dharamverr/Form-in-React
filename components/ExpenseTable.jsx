@@ -1,19 +1,23 @@
 import { useState } from "react";
+import ContextMenu from "./ContextMenu";
 
-
-export default function ExpenseTable({ expenses }) {
+export default function ExpenseTable({ expenses ,setExpenses ,setExpense,setEditingRowId}) {
   const [category,setCategory] = useState('')
-
+  const [menuPosition, setMenuPosition] = useState({})
+  const [rowId, setRowId] = useState('')
   const filterByCategory = expenses.filter((filterData)=>{
      return filterData.category.toLowerCase().includes(category)
   })
 
   const totalPrice =filterByCategory.reduce((accumulator , currentValue)=>{
-        return accumulator + currentValue.amount
+        return accumulator + parseFloat(currentValue.amount)
   },0)
-  console.log(totalPrice);
+
+  
   return (
-    <table className="expense-table">
+    <>
+    <ContextMenu  menuPosition={menuPosition} setMenuPosition={setMenuPosition} setExpenses={setExpenses} rowId={rowId} setExpense={setExpense} expenses={expenses} setEditingRowId={setEditingRowId}/>
+    <table className="expense-table" onClick={()=>setMenuPosition({})}>
       <thead>
         <tr>
           <th>Title</th>
@@ -53,12 +57,16 @@ export default function ExpenseTable({ expenses }) {
         </tr>
       </thead>
       <tbody>
-        {filterByCategory.map((expense) => {
+        {filterByCategory.map(({id,title,category,amount}) => {
           return (
-                    <tr key={expense.id}>
-                    <td>{expense.title}</td>
-                    <td>{expense.category}</td>
-                    <td>₹{expense.amount}</td>
+                    <tr key={id} onContextMenu={(e) =>{
+                      e.preventDefault()
+                      setMenuPosition({left:e.clientX +4 , top:e.clientY + 4})
+                      setRowId(id)
+                  }}>
+                    <td>{title}</td>
+                    <td>{category}</td>
+                    <td>₹{amount}</td>
                     </tr>
                 );
         })}
@@ -70,5 +78,6 @@ export default function ExpenseTable({ expenses }) {
         </tr>
       </tbody>
     </table>
+    </>
   );
 }
