@@ -3,10 +3,7 @@ import Input from "./Input";
 import SelectOption from "./SelectOption";
 
 export default function ExpenseForm({ setExpenses ,setExpense,expense,editingRowId,setEditingRowId}) {
-  /***Get form Data with controlled components*******************/
-  /**get form data using single state */
- 
-  /***Start form Validation ********/
+  
   const [errors, setErrors] = useState({});
   const validationConfig = {
     title: [
@@ -26,7 +23,6 @@ export default function ExpenseForm({ setExpenses ,setExpense,expense,editingRow
 
     Object.entries(formData).forEach(([key,value])=>{
       validationConfig[key].some((rule)=>{
-        //console.log(rule);
           if(rule.required && !value){
             errorsData[key] = rule.message
             return true
@@ -44,28 +40,14 @@ export default function ExpenseForm({ setExpenses ,setExpense,expense,editingRow
       })
     })
 
-    // if (!formData.title) {
-    //   errorsData.title = "Title is required";
-    // }
-
-    // if (!formData.category) {
-    //   errorsData.category = "Please select category";
-    // }
-
-    // if (!formData.amount) {
-    //   errorsData.amount = "Please enter an amount";
-    // }
     setErrors(errorsData);
     return errorsData;
   };
-  /********* End form Validation ********/
 
   function handleSubmit(e) {
     e.preventDefault();
-    /** Form validation function used in event handler***/
     const validateResult = validate(expense);
     if (Object.keys(validateResult).length) return;
-    /** End Form validation function used in event handler ***/
 
       if(editingRowId){
         setExpenses((prevState)=> {
@@ -96,10 +78,8 @@ export default function ExpenseForm({ setExpenses ,setExpense,expense,editingRow
     });
   }
 
-  /** optimization of onChange handler **/
+ 
   const handleChange = (e) => {
-    // const {name} = e.target
-    // setExpense((prevState)=>({...prevState, [name]: e.target.value}))
 
     const { name, value } = e.target;
     setExpense((prevState) => ({ ...prevState, [name]: value }));
