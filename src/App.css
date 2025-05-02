@@ -125,7 +125,9 @@ main {
     position: absolute;
     top: 100%;
 }
-
+.clearSort{
+    cursor: pointer;
+}
 @media (max-width: 900px) {
     body {
         margin-inline: 16px;
